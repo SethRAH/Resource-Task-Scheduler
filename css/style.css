@@ -58,6 +58,14 @@ i.qualifier.qualifier-active {
     color: rgba(255, 61, 0, 0.87);
 }
 
+input.name {
+    background-color: rgba(0,0,0, 0);
+    border-top: 0px;
+    border-left: 0px;
+    border-right: 0px;
+    border-bottom: 1px solid rgba(0,0,0, 0.87);
+}
+
 .material-icons.md-18 { font-size: 18px; }
 .material-icons.md-24 { font-size: 24px; }
 .material-icons.md-36 { font-size: 36px; }

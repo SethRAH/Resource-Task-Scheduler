@@ -27,7 +27,16 @@ var scheduler = new Vue({
             this.resources.push({
                 id: newID,
                 name: 'Resource'+newID,
-                qualifiers:[false, false, false]
+                qualifiers:[{
+                    icon: 'star',
+                    isActive: false
+                    },{
+                    icon: 'favorite',
+                    isActive: false
+                    },{
+                    icon: 'fiber_manual_record',
+                    isActive: false
+                    }]
             });
         },
         removeResource: function(id){
@@ -46,20 +55,8 @@ var scheduler = new Vue({
                 this.resources.splice(foundIndex, 1);
             }
         },
-        toggleQualifier(id, qIndex){
-            //find first instance in array with id
-            var found = false;
-            var foundIndex = -1;
-            for(var i = 0; i < this.resources.length && !found; i++){
-                if(this.resources[i].id === id){
-                    found = true;
-                    foundIndex = i;
-                }
-            }
-
-            if(foundIndex > -1){
-                this.resources[foundIndex].qualifiers[qIndex] = !this.resources[foundIndex].qualifiers[qIndex];
-            }
+        toggleQualifier(qualifier){
+            qualifier.isActive = !qualifier.isActive;
         }
     }
 });
