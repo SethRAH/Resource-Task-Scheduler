@@ -47,21 +47,15 @@ input.form-control {
 }
 
 i.qualifier {
-    -webkit-text-stroke: 1px #FF6E40;
+    color: rgba(255, 61, 0, 0.23);
 }
 
-i.qualifier.qualifier-empty {
-    color: #FF9E80;
-    -webkit-text-fill-color: rgba(255,255,255,1);
+i.qualifier:hover {
+    color: rgba(255, 61, 0, 0.55);
 }
 
-i.qualifier.qualifier-empty:hover {
-    color: #FF9E80;
-    -webkit-text-fill-color: #FF9E80;
-}
-
-i.qualifier.qualifier-full {
-    color: #FF3D00;
+i.qualifier.qualifier-active {
+    color: rgba(255, 61, 0, 0.87);
 }
 
 .material-icons.md-18 { font-size: 18px; }

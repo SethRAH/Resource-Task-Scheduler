@@ -49,43 +49,13 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td><i class="material-icons md-dark md-18">account_box</i></td>
-                                                <td>Bilbo Baggins</td>
-                                                <td>
-                                                    <i class="material-icons qualifier qualifier-full md-18">star</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">favorite</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">fiber_manual_record</i>
-                                                </td>
-                                                <td><i class="material-icons md-dark md-18">remove</i></td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="material-icons md-dark md-18">account_box</i></td>
-                                                <td>Frodo Baggins</td>
-                                                <td>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">star</i>
-                                                    <i class="material-icons qualifier qualifier-full md-18">favorite</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">fiber_manual_record</i>
-                                                </td>
-                                                <td><i class="material-icons md-dark md-18">remove</i></td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="material-icons md-dark md-18">account_box</i></td>
-                                                <td>Brandy Took</td>
-                                                <td>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">star</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">favorite</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">fiber_manual_record</i>
-                                                </td>
-                                                <td><i class="material-icons md-dark md-18">remove</i></td>
-                                            </tr>
                                             <tr v-for="resource in resources">
                                                 <td><i class="material-icons md-dark md-18">account_box</i></td>
                                                 <td>{{resource.name}}</td>
                                                 <td>
-                                                    <i class="material-icons qualifier md-18" >star</i>
-                                                    <i class="material-icons qualifier md-18">favorite</i>
-                                                    <i class="material-icons qualifier md-18">fiber_manual_record</i>
+                                                    <i class="material-icons qualifier clickable md-18" v-on:click="toggleQualifier(resource.id, 0)" v-bind:class="{ 'qualifier-active': resource.qualifiers[0]}">star</i>
+                                                    <i class="material-icons qualifier clickable md-18" v-on:click="toggleQualifier(resource.id, 1)" v-bind:class="{ 'qualifier-active': resource.qualifiers[1]}">favorite</i>
+                                                    <i class="material-icons qualifier clickable md-18" v-on:click="toggleQualifier(resource.id, 2)" v-bind:class="{ 'qualifier-active': resource.qualifiers[2]}">fiber_manual_record</i>
                                                 </td>
                                                 <td><i class="material-icons md-dark md-18 clickable" v-on:click="removeResource(resource.id)">remove</i></td>
                                             </tr>
@@ -119,9 +89,9 @@
                                                 <td>09:00 AM</td>
                                                 <td>2 Hours</td>
                                                 <td>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">star</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">favorite</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">fiber_manual_record</i>
+                                                    <i class="material-icons qualifier clickable md-18">star</i>
+                                                    <i class="material-icons qualifier clickable md-18">favorite</i>
+                                                    <i class="material-icons qualifier clickable md-18">fiber_manual_record</i>
                                                 </td>
                                                 <td><i class="material-icons md-dark md-18">remove</i></td>
                                             </tr>
@@ -130,9 +100,9 @@
                                                 <td>09:00 AM</td>
                                                 <td>0.5 Hours</td>
                                                 <td>
-                                                    <i class="material-icons qualifier qualifier-full md-18">star</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">favorite</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">fiber_manual_record</i>
+                                                    <i class="material-icons qualifier clickable qualifier-active md-18">star</i>
+                                                    <i class="material-icons qualifier clickable md-18">favorite</i>
+                                                    <i class="material-icons qualifier clickable md-18">fiber_manual_record</i>
                                                 </td>
                                                 <td><i class="material-icons md-dark md-18">remove</i></td>
                                             </tr>
@@ -141,9 +111,9 @@
                                                 <td>10:30 AM</td>
                                                 <td>1 Hours</td>
                                                 <td>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">star</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">favorite</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">fiber_manual_record</i>
+                                                    <i class="material-icons qualifier clickable md-18">star</i>
+                                                    <i class="material-icons qualifier clickable md-18">favorite</i>
+                                                    <i class="material-icons qualifier clickable md-18">fiber_manual_record</i>
                                                 </td>
                                                 <td><i class="material-icons md-dark md-18">remove</i></td>
                                             </tr>
@@ -152,9 +122,9 @@
                                                 <td>11:00 AM</td>
                                                 <td>3 Hours</td>
                                                 <td>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">star</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">favorite</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">fiber_manual_record</i>
+                                                    <i class="material-icons qualifier md-18">star</i>
+                                                    <i class="material-icons qualifier md-18">favorite</i>
+                                                    <i class="material-icons qualifier md-18">fiber_manual_record</i>
                                                 </td>
                                                 <td><i class="material-icons md-dark md-18">remove</i></td>
                                             </tr>
@@ -163,9 +133,9 @@
                                                 <td>01:00 PM</td>
                                                 <td>2 Hours</td>
                                                 <td>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">star</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">favorite</i>
-                                                    <i class="material-icons qualifier qualifier-empty md-18">fiber_manual_record</i>
+                                                    <i class="material-icons qualifier md-18">star</i>
+                                                    <i class="material-icons qualifier md-18">favorite</i>
+                                                    <i class="material-icons qualifier md-18">fiber_manual_record</i>
                                                 </td>
                                                 <td><i class="material-icons md-dark md-18">remove</i></td>
                                             </tr>

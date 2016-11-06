@@ -1,3 +1,4 @@
+Vue.config.devtools = true
 var scheduler = new Vue({
 
     // The parent DOM node
@@ -43,6 +44,21 @@ var scheduler = new Vue({
             //If resource was found, remove it
             if(foundIndex > -1){
                 this.resources.splice(foundIndex, 1);
+            }
+        },
+        toggleQualifier(id, qIndex){
+            //find first instance in array with id
+            var found = false;
+            var foundIndex = -1;
+            for(var i = 0; i < this.resources.length && !found; i++){
+                if(this.resources[i].id === id){
+                    found = true;
+                    foundIndex = i;
+                }
+            }
+
+            if(foundIndex > -1){
+                this.resources[foundIndex].qualifiers[qIndex] = !this.resources[foundIndex].qualifiers[qIndex];
             }
         }
     }
