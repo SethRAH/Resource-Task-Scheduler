@@ -33,7 +33,7 @@
             <div class="row nopadding">
                 <div class="col-md-12 nopadding">
                     <div class="row card-row nopadding">
-                        <div class="col-lg-3 fill-card">
+                        <div class="col-sm-12 col-md-12 col-lg-6 fill-card">
                             <div class="padding-50 card-bg">
                                 <div class="nopadding">
                                     <h3>Resources</h3>
@@ -66,12 +66,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-4 fill-card">
+                        <div class="col-sm-12 col-md-12 col-lg-6 fill-card">
                             <div class="padding-50 card-bg">
                                <div class="nopadding">
                                     <h3>Tasks</h3>
                                 </div>
-                                <div class="nopadding">
+                                <div class="nopadding table-responsive">
                                     <table class="table table-striped table-condensed">
                                         <thead>
                                             <tr>
@@ -84,14 +84,14 @@
                                         </thead>
                                         <tbody>
                                             <tr v-for="task in tasks">
-                                                <td><input type="text" v-model.trim="task.name" class="name" /></td>
-                                                <td>{{ task.startTime }}</td>
-                                                <td>{{ task.duration }}</td>
+                                                <td><input type="text" v-model.trim="task.name" class="name micro-padding-top" /></td>
+                                                <td><time-input v-model="task.startTime"></time-input></td>
+                                                <td><duration-input v-model="task.duration"></duration-input></td>
                                                 <td>
-                                                     <i v-for="qualifier in task.qualifiers" class="material-icons qualifier clickable md-18" 
+                                                     <i v-for="qualifier in task.qualifiers" class="material-icons qualifier clickable md-18 micro-padding-top" 
                                                     v-on:click="toggleQualifier(qualifier)" v-bind:class="{ 'qualifier-active': qualifier.isActive}">{{ qualifier.icon }}</i>
                                                 </td>
-                                                <td><i class="material-icons md-dark md-18 clickable" v-on:click="removeTask(task.hiddenID)">remove</i></td>
+                                                <td><i class="material-icons md-dark md-18 clickable micro-padding-top" v-on:click="removeTask(task.hiddenID)">remove</i></td>
                                             </tr>
                                         </tbody>     
                                         <tfoot>
@@ -101,14 +101,35 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-5 fill-card">
+                        <div class="col-sm-12 col-md-12 col-lg-12 fill-card">
                             <div class="padding-50 card-bg">
                                 <div class="nopadding">
-                                    <h3>Schedule</h3>
+                                    <h3>Current Model</h3>
                                 </div>
-                                <div class="nopadding">
-                                    <p>Here is some stuff</p>
-                                    <p>Here is some other stuff</p>
+                                <div class="row nopadding">
+                                    <div class="col-md-4">
+                                        <h4>Resources</h4>
+                                        <div v-for="resource in resources" class="row nopadding">
+                                            <div class="col-sm-6">{{ resource.name }}</div>
+                                            <div class="col-sm-6">
+                                                <i v-for="qualifier in resource.qualifiers" class="material-icons qualifier  md-18" 
+                                                    v-bind:class="{ 'qualifier-active': qualifier.isActive}">{{ qualifier.icon }}</i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <h4>Tasks</h4>
+                                        <div v-for="task in tasks" class="row nopadding">
+                                            <div class="col-sm-1">{{ task.hiddenID }}</div>
+                                            <div class="col-sm-4">{{ task.name }}</div>
+                                            <div class="col-sm-2"> {{ task.startTime | minutesToTime }} ({{ task.startTime }})</div>
+                                            <div class="col-sm-3"> {{ task.duration | minutesToDuration }} ({{task.duration}})</div>
+                                            <div class="col-sm-2">
+                                                <i v-for="qualifier in task.qualifiers" class="material-icons qualifier  md-18" 
+                                                    v-bind:class="{ 'qualifier-active': qualifier.isActive}">{{ qualifier.icon }}</i>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
