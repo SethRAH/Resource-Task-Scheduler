@@ -240,198 +240,207 @@ var scheduler = new Vue({
                 return [];
             }
             else{
-                //-------------------
-                //Raw Permute options
-                //-------------------
-                var count = Math.pow(this.resources.length, this.tasks.length) - 1;
-                // Initialize the array of possible schedules
-                var results = [];
-                // Initialize the index counter and the temp array
-                var tempArray = [];
-                var curIndexArray = [];
-                for(var i = 0; i<this.tasks.length; i++){
-                    curIndexArray.push(0);
-                    tempArray.push({task: this.tasks[i], resource: this.resources[0]});
-                }
-                // Push the first temp array into results;
-                results.push(tempArray);
-                // Loop through the rest of the permutations and add to the array
-                for(var i = 0; i < count; i++){
-                    // Increment counter array
-                    var highestIncrementableIndex = curIndexArray.length - 1;
-                    var highestIncrementableIndexFound = false;
-                    for(var j = highestIncrementableIndex; j >= 0 && !highestIncrementableIndexFound; j--){
-                        if(curIndexArray[j] < this.resources.length-1){
-                            highestIncrementableIndexFound = true;
-                            highestIncrementableIndex = j;
-                            curIndexArray[j]++;
-                        }
-                    }
+            //     //-------------------
+            //     //Raw Permute options
+            //     //-------------------
+            //     var count = Math.pow(this.resources.length, this.tasks.length) - 1;
+            //     // Initialize the array of possible schedules
+            //     var results = [];
+            //     // Initialize the index counter and the temp array
+            //     var tempArray = [];
+            //     var curIndexArray = [];
+            //     for(var i = 0; i<this.tasks.length; i++){
+            //         curIndexArray.push(0);
+            //         tempArray.push({task: this.tasks[i], resource: this.resources[0]});
+            //     }
+            //     // Push the first temp array into results;
+            //     results.push(tempArray);
+            //     // Loop through the rest of the permutations and add to the array
+            //     for(var i = 0; i < count; i++){
+            //         // Increment counter array
+            //         var highestIncrementableIndex = curIndexArray.length - 1;
+            //         var highestIncrementableIndexFound = false;
+            //         for(var j = highestIncrementableIndex; j >= 0 && !highestIncrementableIndexFound; j--){
+            //             if(curIndexArray[j] < this.resources.length-1){
+            //                 highestIncrementableIndexFound = true;
+            //                 highestIncrementableIndex = j;
+            //                 curIndexArray[j]++;
+            //             }
+            //         }
 
-                    //Reset all the higher indexes to 0
-                    for(var j = highestIncrementableIndex + 1; j < curIndexArray.length; j++){
-                        curIndexArray[j] = 0;
-                    }
+            //         //Reset all the higher indexes to 0
+            //         for(var j = highestIncrementableIndex + 1; j < curIndexArray.length; j++){
+            //             curIndexArray[j] = 0;
+            //         }
 
-                    //build out temp array and push to results
-                    tempArray = [];
-                    for(var j = 0; j < this.tasks.length; j++){
-                        tempArray.push({task: this.tasks[j], resource: this.resources[curIndexArray[j]]});
-                    }
+            //         //build out temp array and push to results
+            //         tempArray = [];
+            //         for(var j = 0; j < this.tasks.length; j++){
+            //             tempArray.push({task: this.tasks[j], resource: this.resources[curIndexArray[j]]});
+            //         }
 
-                    results.push(tempArray);
-                }
+            //         results.push(tempArray);
+            //     }
 
-                //-------------------------
-                //Filter By Qualifiers
-                //-------------------------
+            //     //-------------------------
+            //     //Filter By Qualifiers
+            //     //-------------------------
 
-                results = results.filter(function(schedule){
-                    var invalidScheduleTasks =  schedule.filter(function(scheduleTask){
-                        var scheduleTaskValid = true;
-                        //for each qualifier that is true, check to see if the corresponding qualifier is true for the resource
-                        for(var i = 0; i < scheduleTask.task.qualifiers.length; i++){
-                            if(scheduleTask.task.qualifiers[i].isActive && !scheduleTask.resource.qualifiers[i].isActive){
-                                scheduleTaskValid = false;
-                            }
-                        }
-                        return !scheduleTaskValid;
-                    });
+            //     results = results.filter(function(schedule){
+            //         var invalidScheduleTasks =  schedule.filter(function(scheduleTask){
+            //             var scheduleTaskValid = true;
+            //             //for each qualifier that is true, check to see if the corresponding qualifier is true for the resource
+            //             for(var i = 0; i < scheduleTask.task.qualifiers.length; i++){
+            //                 if(scheduleTask.task.qualifiers[i].isActive && !scheduleTask.resource.qualifiers[i].isActive){
+            //                     scheduleTaskValid = false;
+            //                 }
+            //             }
+            //             return !scheduleTaskValid;
+            //         });
 
-                    return invalidScheduleTasks === undefined || invalidScheduleTasks.length < 1
-                });
+            //         return invalidScheduleTasks === undefined || invalidScheduleTasks.length < 1
+            //     });
 
-                //-------------------------
-                //Filter By Availability
-                //-------------------------
-                var tempResources = this.resources
-                results = results.filter(function(schedule){
-                    var resourceDoubleBooked = false;
-                    for(var i = 0; i < tempResources.length && !resourceDoubleBooked; i++){
-                        var resourceAllocationTimespans = [];
-                        for(var j = 0; j < schedule.length && !resourceDoubleBooked; j++){
-                            if(schedule[j].resource === tempResources[i]){
-                                //this task/resource on the schedule is valid for the resource we are looking at
-                                // go ahead and check overlap. If overlap, flag as double booked, otherwise add timespan to allocation
-                                var tempStart = schedule[j].task.startTime;
-                                var tempEnd = tempStart + schedule[j].task.duration;
+            //     //-------------------------
+            //     //Filter By Availability
+            //     //-------------------------
+            //     var tempResources = this.resources
+            //     results = results.filter(function(schedule){
+            //         var resourceDoubleBooked = false;
+            //         for(var i = 0; i < tempResources.length && !resourceDoubleBooked; i++){
+            //             var resourceAllocationTimespans = [];
+            //             for(var j = 0; j < schedule.length && !resourceDoubleBooked; j++){
+            //                 if(schedule[j].resource === tempResources[i]){
+            //                     //this task/resource on the schedule is valid for the resource we are looking at
+            //                     // go ahead and check overlap. If overlap, flag as double booked, otherwise add timespan to allocation
+            //                     var tempStart = schedule[j].task.startTime;
+            //                     var tempEnd = tempStart + schedule[j].task.duration;
 
-                                for(var k = 0; k < resourceAllocationTimespans.length && !resourceDoubleBooked; k++){
-                                    // if overlap
-                                    if(tempStart < resourceAllocationTimespans[k].endTime && tempEnd >= resourceAllocationTimespans[k].startTime){
-                                        resourceDoubleBooked = true;
-                                    }
-                                }
+            //                     for(var k = 0; k < resourceAllocationTimespans.length && !resourceDoubleBooked; k++){
+            //                         // if overlap
+            //                         if(tempStart < resourceAllocationTimespans[k].endTime && tempEnd >= resourceAllocationTimespans[k].startTime){
+            //                             resourceDoubleBooked = true;
+            //                         }
+            //                     }
 
-                                resourceAllocationTimespans.push({startTime: tempStart, endTime: tempEnd});
-                            }
-                        }
-                    }
-                    return !resourceDoubleBooked;
-                });
+            //                     resourceAllocationTimespans.push({startTime: tempStart, endTime: tempEnd});
+            //                 }
+            //             }
+            //         }
+            //         return !resourceDoubleBooked;
+            //     });
 
-                //-----------------------------
-                //Remove Equivalent schedules
-                //-----------------------------
-                var distilledResults = [];
+            //     //-----------------------------
+            //     //Remove Equivalent schedules
+            //     //-----------------------------
+            //     var distilledResults = [];
 
-                results = results.map(function(itm){
-                    for(var i = 0; i < results; i++){
-                        //Will be used to translate resources into their equivalence alias
-                        var resourceDictionary = [];
-                        //Will be used to quickly figure out newer equivalence aliases
-                        var equivalentIncrementor = [];
+            //     results = results.map(function(itm){
+            //         for(var i = 0; i < results; i++){
+            //             //Will be used to translate resources into their equivalence alias
+            //             var resourceDictionary = [];
+            //             //Will be used to quickly figure out newer equivalence aliases
+            //             var equivalentIncrementor = [];
 
                         
 
 
-                    }
-                });
+            //         }
+            //     });
                 
 
 
-                //-------------------------------------------------
-                //Add Stats for Summary and for Scoring/Filtering
-                //-------------------------------------------------
-                //  Assumes that overlapping time allocations have
-                //  already been filtered out
-                //-------------------------------------------------
-                results = results.map(function(itm){
-                    //Grab Resource Stats
-                    var resourceStats = {
-                        totalWorkTime: 0,
-                        totalDownTime: 0,
-                        avgWorkTime: 0,
-                        avgDownTime: 0
-                    };
+            //     //-------------------------------------------------
+            //     //Add Stats for Summary and for Scoring/Filtering
+            //     //-------------------------------------------------
+            //     //  Assumes that overlapping time allocations have
+            //     //  already been filtered out
+            //     //-------------------------------------------------
+            //     results = results.map(function(itm){
+            //         //Grab Resource Stats
+            //         var resourceStats = {
+            //             totalWorkTime: 0,
+            //             totalDownTime: 0,
+            //             avgWorkTime: 0,
+            //             avgDownTime: 0
+            //         };
 
-                    var resources = [];
-                    for(var i = 0; i < tempResources.length; i++){
-                        resources.push({
-                                rID: tempResources[i].id,
-                                name: tempResources[i].name,
-                                allocationTimespans: [],
-                                earliestStart: 0,
-                                latestEnd: 0,
-                                totalWorkTime: 0,
-                                totalDownTime: 0 
-                            })
-                    }
+            //         var resources = [];
+            //         for(var i = 0; i < tempResources.length; i++){
+            //             resources.push({
+            //                     rID: tempResources[i].id,
+            //                     name: tempResources[i].name,
+            //                     allocationTimespans: [],
+            //                     earliestStart: 0,
+            //                     latestEnd: 0,
+            //                     totalWorkTime: 0,
+            //                     totalDownTime: 0 
+            //                 })
+            //         }
 
-                    for(var i = 0; i < itm.length; i++){
-                        //for each assigned task, get the resource index for the assigned resource
-                        var resourceIndex = resources.indexOfConditional(function(el){
-                            return el.rID === itm[i].resource.id;
-                        });
+            //         for(var i = 0; i < itm.length; i++){
+            //             //for each assigned task, get the resource index for the assigned resource
+            //             var resourceIndex = resources.indexOfConditional(function(el){
+            //                 return el.rID === itm[i].resource.id;
+            //             });
 
-                        //add allocation to resource
-                        var tempStart = itm[i].task.startTime;
-                        var tempEnd = tempStart + itm[i].task.duration;
+            //             //add allocation to resource
+            //             var tempStart = itm[i].task.startTime;
+            //             var tempEnd = tempStart + itm[i].task.duration;
 
-                        resources[resourceIndex].allocationTimespans.push({startTime: tempStart, endTime:tempEnd});
-                    }
+            //             resources[resourceIndex].allocationTimespans.push({startTime: tempStart, endTime:tempEnd});
+            //         }
 
-                    resources = resources.map(function(resource){
-                        var sortedAllocation = resource.allocationTimespans.sort(function(a,b){return a.startTime - b.startTime});
-                        var earliest = 0;
-                        var latest = 0;
-                        var totalWork = 0;
-                        var totalDown = 0;
-                        if(sortedAllocation.length > 0){
-                            earliest = sortedAllocation[0].startTime;
-                            latest = sortedAllocation[sortedAllocation.length - 1].endTime;
-                            for(var i = 0; i< sortedAllocation.length; i++){
-                                totalWork += (sortedAllocation[i].endTime - sortedAllocation[i].startTime);
-                                if(i > 0){
-                                    totalDown += (sortedAllocation[i].startTime - sortedAllocation[i-1].endTime);
-                                }
-                            }
+            //         resources = resources.map(function(resource){
+            //             var sortedAllocation = resource.allocationTimespans.sort(function(a,b){return a.startTime - b.startTime});
+            //             var earliest = 0;
+            //             var latest = 0;
+            //             var totalWork = 0;
+            //             var totalDown = 0;
+            //             if(sortedAllocation.length > 0){
+            //                 earliest = sortedAllocation[0].startTime;
+            //                 latest = sortedAllocation[sortedAllocation.length - 1].endTime;
+            //                 for(var i = 0; i< sortedAllocation.length; i++){
+            //                     totalWork += (sortedAllocation[i].endTime - sortedAllocation[i].startTime);
+            //                     if(i > 0){
+            //                         totalDown += (sortedAllocation[i].startTime - sortedAllocation[i-1].endTime);
+            //                     }
+            //                 }
 
-                        }
+            //             }
                         
-                        return {
-                            rID: resource.rID,
-                            name: resource.name,
-                            allocationTimespans: sortedAllocation,
-                            earliestStart: earliest,
-                            latestEnd: latest,
-                            totalWorkTime: totalWork,
-                            totalDownTime: totalDown
-                        };
-                    });
+            //             return {
+            //                 rID: resource.rID,
+            //                 name: resource.name,
+            //                 allocationTimespans: sortedAllocation,
+            //                 earliestStart: earliest,
+            //                 latestEnd: latest,
+            //                 totalWorkTime: totalWork,
+            //                 totalDownTime: totalDown
+            //             };
+            //         });
 
-                    for(var i =0; i < resources.length; i++){
-                        resourceStats.totalWorkTime += resources[i].totalWorkTime;
-                        resourceStats.totalDownTime += resources[i].totalDownTime;
-                    }
+            //         for(var i =0; i < resources.length; i++){
+            //             resourceStats.totalWorkTime += resources[i].totalWorkTime;
+            //             resourceStats.totalDownTime += resources[i].totalDownTime;
+            //         }
 
-                    resourceStats.avgWorkTime = resourceStats.totalWorkTime / resources.length;
-                    resourceStats.avgDownTime = resourceStats.totalDownTime / resources.length;
+            //         resourceStats.avgWorkTime = resourceStats.totalWorkTime / resources.length;
+            //         resourceStats.avgDownTime = resourceStats.totalDownTime / resources.length;
 
-                    return { resourceStats: resourceStats, schedule: itm, resources: resources };
+            //         return { resourceStats: resourceStats, schedule: itm, resources: resources };
+            //     });
+
+            //     return results;
+            // }
+                var scheduleOptions = [];
+                var currentTasks = objClone(this.tasks);
+                var currentResourceAllocations = this.resources.map(function(resource){
+                    return {rID: resource.id, allocations: []};
                 });
+                this.recursiveScheduleBuilder(scheduleOptions, currentTasks, currentResourceAllocations );
 
-                return results;
+                return scheduleOptions;
             }
         }
     },
@@ -599,7 +608,7 @@ var scheduler = new Vue({
             return formatted;
         },
         recursiveScheduleBuilder: function(scheduleOptions, currentTasks, currentResourceAllocations){
-            var nextIndex = currentTasks.indexOfConditional(function(itm){ return itm.resource === undefined});
+            var nextIndex = currentTasks.indexOfConditional(function(itm){ return itm.rID === undefined});
             
             //if all tasks are allocated, add to ScheduleOptions and return
             if(nextIndex < 0){
@@ -617,7 +626,7 @@ var scheduler = new Vue({
                 resourceOptions = this.resources.filter(function(resource){
                     var valid = true;
                     for(var i = 0; i < resource.qualifiers.length && valid; i++){
-                        if(this.currentTasks[nextIndex].qualifiers[i].isActive && !resource.qualifiers[i].isActive ){
+                        if(currentTasks[nextIndex].qualifiers[i].isActive && !resource.qualifiers[i].isActive ){
                             valid = false;
                         }
                     }
@@ -627,13 +636,15 @@ var scheduler = new Vue({
                 resourceOptions = resourceOptions.filter(function(resource){
                     var valid = true;
                     
-                    var tempStart = this.currentTasks[nextIndex].startTime;
-                    var tempEnd = tempStart + this.currentTasks[nextIndex].duration;
+                    var tempStart = currentTasks[nextIndex].startTime;
+                    var tempEnd = tempStart + currentTasks[nextIndex].duration;
                     var resourceIndex = currentResourceAllocations.indexOfConditional(function(itm){
                         return itm.rID === resource.id;
                     });
-                    var resourceAllocationTimespans = currentResourceAllocations[resourceIndex];
-
+                    var resourceAllocationTimespans = [];
+                    if(resourceIndex > -1){
+                        resourceAllocationTimespans = currentResourceAllocations[resourceIndex].allocations;
+                    }
                     for(var k = 0; k < resourceAllocationTimespans.length && valid; k++){
                         // if overlap
                         if(tempStart < resourceAllocationTimespans[k].endTime && tempEnd >= resourceAllocationTimespans[k].startTime){
@@ -644,8 +655,33 @@ var scheduler = new Vue({
                     return valid;
                 });
                 //if no resources, return scheduleOptions  (Dead End)
-
+                if(resourceOptions.length < 1){
+                    return scheduleOptions;
+                }
+                else{
                 //otherwise, iterate through resource options and call recursive. Update scheduleOptions prior to each call.
+                    for( var i = 0; i < resourceOptions.length; i++){
+                        // this.recursiveScheduleBuilder(scheduleOptions, currentTasks, currentResourceAllocations)
+                        var resourceID = resourceOptions[i].id;
+                        var newResourceAllocations = currentResourceAllocations.map(function(itm){
+                            var resourceAllocationTimespans = objClone(itm);
+                            if(itm.rID === resourceID){
+                                var tempStart = currentTasks[nextIndex].startTime;
+                                var tempEnd = tempStart + currentTasks[nextIndex].duration;
+                                resourceAllocationTimespans.allocations.push({startTime: tempStart, endTime: tempEnd});
+                            }
+
+                            return resourceAllocationTimespans;
+                        });
+
+                        var newCurrentTasks = objClone(currentTasks);
+                        newCurrentTasks[nextIndex].rID = resourceOptions[i].id;
+
+                        this.recursiveScheduleBuilder(scheduleOptions, newCurrentTasks, newResourceAllocations);
+                    }
+                    //Since scheduleOptions are passed by referenced (native js), I shouldn't have to worry about merging them
+                    return scheduleOptions;
+                }
             }
         }
     }
