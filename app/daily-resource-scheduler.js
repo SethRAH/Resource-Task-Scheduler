@@ -330,6 +330,26 @@ var scheduler = new Vue({
                     return !resourceDoubleBooked;
                 });
 
+                //-----------------------------
+                //Remove Equivalent schedules
+                //-----------------------------
+                var distilledResults = [];
+
+                results = results.map(function(itm){
+                    for(var i = 0; i < results; i++){
+                        //Will be used to translate resources into their equivalence alias
+                        var resourceDictionary = [];
+                        //Will be used to quickly figure out newer equivalence aliases
+                        var equivalentIncrementor = [];
+
+                        
+
+
+                    }
+                });
+                
+
+
                 //-------------------------------------------------
                 //Add Stats for Summary and for Scoring/Filtering
                 //-------------------------------------------------
@@ -568,7 +588,6 @@ var scheduler = new Vue({
                 this.tasks.splice(foundIndex, 1);
             }
         },
-
         toTwoDigitNumberFormat: function(value){
             if(!value) return '00';
             var formatted = value.toString();
@@ -578,6 +597,56 @@ var scheduler = new Vue({
                 }
             }
             return formatted;
+        },
+        recursiveScheduleBuilder: function(scheduleOptions, currentTasks, currentResourceAllocations){
+            var nextIndex = currentTasks.indexOfConditional(function(itm){ return itm.resource === undefined});
+            
+            //if all tasks are allocated, add to ScheduleOptions and return
+            if(nextIndex < 0){
+                var scheduleOption = {
+                    tasks: currentTasks,
+                    resourceAllocation: currentResourceAllocations
+                };
+                scheduleOptions.push(scheduleOption);
+                return scheduleOptions;
+            }
+            //otherwise, for the next open task, call recursive for each valid possible resource choice, then return scheduleOptions
+            else{
+                var resourceOptions = [];
+                //limit valid resources by qualifier
+                resourceOptions = this.resources.filter(function(resource){
+                    var valid = true;
+                    for(var i = 0; i < resource.qualifiers.length && valid; i++){
+                        if(this.currentTasks[nextIndex].qualifiers[i].isActive && !resource.qualifiers[i].isActive ){
+                            valid = false;
+                        }
+                    }
+                    return valid;
+                });
+                //limit valid resources by Availability
+                resourceOptions = resourceOptions.filter(function(resource){
+                    var valid = true;
+                    
+                    var tempStart = this.currentTasks[nextIndex].startTime;
+                    var tempEnd = tempStart + this.currentTasks[nextIndex].duration;
+                    var resourceIndex = currentResourceAllocations.indexOfConditional(function(itm){
+                        return itm.rID === resource.id;
+                    });
+                    var resourceAllocationTimespans = currentResourceAllocations[resourceIndex];
+
+                    for(var k = 0; k < resourceAllocationTimespans.length && valid; k++){
+                        // if overlap
+                        if(tempStart < resourceAllocationTimespans[k].endTime && tempEnd >= resourceAllocationTimespans[k].startTime){
+                            valid = false;
+                        }
+                    }
+
+                    return valid;
+                });
+                //if no resources, return scheduleOptions  (Dead End)
+
+                //otherwise, iterate through resource options and call recursive. Update scheduleOptions prior to each call.
+            }
         }
     }
 });
