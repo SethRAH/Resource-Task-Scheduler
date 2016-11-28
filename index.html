@@ -137,7 +137,9 @@
                             <div class="padding-50 card-bg">
                                 <div class="nopadding">
                                     <h3>Calc Schedules</h3>
-                                    <h5 v-if="schedules">Count: {{schedules.length}}</h5>
+                                    <h5 v-if="schedules.options">Count: {{schedules.options.length}}</h5>
+                                    <h5 v-if="schedules.numCalls">Num Recursive Calls: {{schedules.numCalls}}</h5>
+                                    
                                 </div>
                                 <!--<div v-for="schedule in schedules">
                                     <div class="row nopadding">

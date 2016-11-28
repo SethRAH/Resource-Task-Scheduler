@@ -234,6 +234,42 @@ var scheduler = new Vue({
         tasks: []
     },
     computed: {
+        aliasedResources: function(){
+            var equivalentResources = [];
+            for(var i = 0; i < this.resources.length; i++){
+                //For each resource, check to see if its qualifier bin already exists
+                var binIndex = -1;
+                for(var j = 0; j < equivalentResources.length && binIndex < 0; j++){
+                    var binMatch = true;
+                    for(var k = 0; binMatch && k < this.resources[i].qualifiers.length; k++){
+                        if(this.resources[i].qualifiers[k].isActive !== equivalentResources[j].qualifiers[k].isActive){
+                            binMatch = false;
+                        }
+                    }
+                    if(binMatch){ binIndex = j; }
+                }
+
+                if(binIndex > -1){
+                    equivalentResources[binIndex].resources.push({rID: this.resources[i].id, aliasID: binIndex, aliasSubID: equivalentResources[binIndex].resources.length });
+                }
+                else{
+                    var newQualifiers = objClone(this.resources[i].qualifiers);
+                    var newResource = {rID: this.resources[i].id, aliasID: equivalentResources.length, aliasSubID: 0};
+                    equivalentResources.push({qualifiers: newQualifiers, resources: [newResource] });
+                }
+            }
+            var tmpAliasedResources = [];
+            for(var i = 0; i < equivalentResources.length; i++){
+                for(var j = 0; j < equivalentResources[i].resources.length; j++){
+                    tmpAliasedResources.push({rID: equivalentResources[i].resources[j].rID, 
+                        aliasID: equivalentResources[i].resources[j].aliasID,
+                        aliasSubID: equivalentResources[i].resources[j].aliasSubID,
+                        qualifiers: objClone(equivalentResources[i].qualifiers)
+                    });
+                }
+            }
+            return tmpAliasedResources;
+        },
         schedules: function(){
             if(this.resources === undefined || this.resources.length === 0 
                 || this.tasks === undefined || this.tasks.length === 0 ){
@@ -433,14 +469,21 @@ var scheduler = new Vue({
 
             //     return results;
             // }
+                
                 var scheduleOptions = [];
                 var currentTasks = objClone(this.tasks);
-                var currentResourceAllocations = this.resources.map(function(resource){
-                    return {rID: resource.id, allocations: []};
+                var currentResourceAllocations = this.aliasedResources.map(function(itm){
+                    return {
+                        rID: itm.rID,
+                        aliasID: itm.aliasID,
+                        aliasSubID: itm.aliasSubID,
+                        allocations: []
+                    };
                 });
-                this.recursiveScheduleBuilder(scheduleOptions, currentTasks, currentResourceAllocations );
+                var recursiveStats = {numCalls: 0 };
+                this.recursiveScheduleBuilder(scheduleOptions, currentTasks, currentResourceAllocations, recursiveStats);
 
-                return scheduleOptions;
+                return {options: scheduleOptions, numCalls: recursiveStats.numCalls };
             }
         }
     },
@@ -607,7 +650,8 @@ var scheduler = new Vue({
             }
             return formatted;
         },
-        recursiveScheduleBuilder: function(scheduleOptions, currentTasks, currentResourceAllocations){
+        recursiveScheduleBuilder: function(scheduleOptions, currentTasks, currentResourceAllocations, recursiveStats){
+            recursiveStats.numCalls++;
             var nextIndex = currentTasks.indexOfConditional(function(itm){ return itm.rID === undefined});
             
             //if all tasks are allocated, add to ScheduleOptions and return
@@ -622,8 +666,23 @@ var scheduler = new Vue({
             //otherwise, for the next open task, call recursive for each valid possible resource choice, then return scheduleOptions
             else{
                 var resourceOptions = [];
+                //limit valid resources by equivalency (if equivalency bin hasn't been used then just have the first one, if its been used once, have the first and second etc)
+                resourceOptions = this.aliasedResources.filter(function(resource){
+                    var valid = false;
+                    if(resource.aliasSubID > 0){
+                        for(var i = 0; i < currentTasks.length && !valid; i++ ){
+                            if(currentTasks[i].aliasID === resource.aliasID && currentTasks[i].aliasSubID === resource.aliasSubID - 1){
+                                valid = true;
+                            }
+                        }
+                    } else{
+                        valid = true;
+                    }
+                    return valid;
+                }); 
+
                 //limit valid resources by qualifier
-                resourceOptions = this.resources.filter(function(resource){
+                resourceOptions = resourceOptions.filter(function(resource){
                     var valid = true;
                     for(var i = 0; i < resource.qualifiers.length && valid; i++){
                         if(currentTasks[nextIndex].qualifiers[i].isActive && !resource.qualifiers[i].isActive ){
@@ -639,7 +698,7 @@ var scheduler = new Vue({
                     var tempStart = currentTasks[nextIndex].startTime;
                     var tempEnd = tempStart + currentTasks[nextIndex].duration;
                     var resourceIndex = currentResourceAllocations.indexOfConditional(function(itm){
-                        return itm.rID === resource.id;
+                        return itm.rID === resource.rID;
                     });
                     var resourceAllocationTimespans = [];
                     if(resourceIndex > -1){
@@ -662,7 +721,7 @@ var scheduler = new Vue({
                 //otherwise, iterate through resource options and call recursive. Update scheduleOptions prior to each call.
                     for( var i = 0; i < resourceOptions.length; i++){
                         // this.recursiveScheduleBuilder(scheduleOptions, currentTasks, currentResourceAllocations)
-                        var resourceID = resourceOptions[i].id;
+                        var resourceID = resourceOptions[i].rID;
                         var newResourceAllocations = currentResourceAllocations.map(function(itm){
                             var resourceAllocationTimespans = objClone(itm);
                             if(itm.rID === resourceID){
@@ -675,9 +734,11 @@ var scheduler = new Vue({
                         });
 
                         var newCurrentTasks = objClone(currentTasks);
-                        newCurrentTasks[nextIndex].rID = resourceOptions[i].id;
+                        newCurrentTasks[nextIndex].rID = resourceOptions[i].rID;
+                        newCurrentTasks[nextIndex].aliasID = resourceOptions[i].aliasID;
+                        newCurrentTasks[nextIndex].aliasSubID = resourceOptions[i].aliasSubID;
 
-                        this.recursiveScheduleBuilder(scheduleOptions, newCurrentTasks, newResourceAllocations);
+                        this.recursiveScheduleBuilder(scheduleOptions, newCurrentTasks, newResourceAllocations, recursiveStats);
                     }
                     //Since scheduleOptions are passed by referenced (native js), I shouldn't have to worry about merging them
                     return scheduleOptions;
